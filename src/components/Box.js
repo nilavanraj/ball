@@ -21,9 +21,9 @@ const speedRotation = {
   3: 0.07,
 };
 const speedFall = {
-  1: 1,
-  2: 5,
-  3: 10,
+  1: 5,
+  2: 3,
+  3: 2,
 };
 const Box = ({
   WIDTH,
@@ -39,10 +39,11 @@ const Box = ({
   delay,
   x = 0,
   y = 0,
+  gameOver,
 }) => {
-  const incrementX = Math.abs((windowWidth/2)-x)/(windowHeight/2)
+  const incrementX = (windowWidth / 2 - x) / (windowHeight / 2);
   const rx = useValue(x);
-  const ry = useValue(0);
+  const ry = useValue(y);
   const position = useValue(0.785);
   const dynamicWidth = useValue(WIDTH);
   const dynamicHeight = useValue(HEIGHT);
@@ -50,6 +51,10 @@ const Box = ({
   let hit = {};
   const clock = ValueApi.createClockValue();
   clock.addListener(() => {
+    if (gameOver.current) {
+      clock.stop();
+    }
+
     if (ry.current > 500 || ballTouch.current) {
       if (dynamicWidth.current < 10) {
         dynamicWidth.current = 0;
@@ -95,11 +100,13 @@ const Box = ({
     ) {
       hit.check = true;
       if (isPoints) {
-        pointGain();
+        // pointGain();
+       // clock.stop();
+        DeviceEventEmitter.emit('pointGain', true);
         ballTouch.current = true;
       } else {
         clock.stop();
-        DeviceEventEmitter.emit('hit', true);
+        
         hitGain();
       }
     }
@@ -130,4 +137,11 @@ const Box = ({
     </Group>
   );
 };
-export default Box;
+function areEqual(prevProps, nextProps) {
+  /*
+  return true if passing nextProps to render would return
+  the same result as passing prevProps to render,
+  otherwise return false
+  */
+}
+export default React.memo(Box, () => true);
