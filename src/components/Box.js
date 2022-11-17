@@ -40,6 +40,8 @@ const Box = ({
   x = 0,
   y = 0,
   gameOver,
+  index,
+  isfall = true,
 }) => {
   const incrementX = (windowWidth / 2 - x) / (windowHeight / 2);
   const rx = useValue(x);
@@ -55,11 +57,11 @@ const Box = ({
       clock.stop();
     }
 
-    if (ry.current > 500 || ballTouch.current) {
+    if (ry.current > 400 || ballTouch.current) {
       if (dynamicWidth.current < 10) {
         dynamicWidth.current = 0;
         dynamicHeight.current = 0;
-        !ballTouch.current && hitLost();
+        !ballTouch.current && hitLost(index);
         clock.stop();
       } else {
         dynamicWidth.current -= 10;
@@ -72,7 +74,9 @@ const Box = ({
     }
     position.current = position.current + speedRotation[sr];
     ry.current += speedFall[sf];
-    rx.current = x + incrementX * ry.current;
+    if (isfall) {
+      rx.current = x + incrementX * ry.current;
+    }
     return 1;
   });
 
@@ -92,6 +96,8 @@ const Box = ({
   useValueEffect(position, () => {
     // const angle = (position.current * 180) / Math.PI;
     if (
+      pointerX?.current &&
+      pointerY?.current &&
       hasIntersection(
         {x: pointerX.current, y: pointerY.current, r: 21},
         {x: rx.current, y: ry.current, width: WIDTH, height: HEIGHT},
@@ -101,13 +107,12 @@ const Box = ({
       hit.check = true;
       if (isPoints) {
         // pointGain();
-       // clock.stop();
-        DeviceEventEmitter.emit('pointGain', true);
+        // clock.stop();
+        DeviceEventEmitter.emit('pointGain', index);
         ballTouch.current = true;
       } else {
         clock.stop();
-        
-        hitGain();
+        hitGain(index);
       }
     }
     try {
@@ -137,11 +142,4 @@ const Box = ({
     </Group>
   );
 };
-function areEqual(prevProps, nextProps) {
-  /*
-  return true if passing nextProps to render would return
-  the same result as passing prevProps to render,
-  otherwise return false
-  */
-}
 export default React.memo(Box, () => true);
