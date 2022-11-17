@@ -6,3 +6,6 @@ React Native 2D Game
 <img src="https://user-images.githubusercontent.com/58332892/202493173-c6603e7f-6df7-4205-970a-ce3c381bc5d1.png" height="500" />
 
 </p>
+
+Download here
+https://drive.google.com/file/d/15F4xEkUtMGsapxMBdZ9dz2EqT9QptUWs/view?usp=sharing
