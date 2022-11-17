@@ -14,6 +14,7 @@ import {
   Text,
   StyleSheet,
   DeviceEventEmitter,
+  Vibration,
 } from 'react-native';
 
 import {
@@ -21,14 +22,19 @@ import {
   Circle,
   useValue,
   useTouchHandler,
+  RoundedRect,
 } from '@shopify/react-native-skia';
 import Box from '../components/Box';
 import Lottie from 'lottie-react-native';
-import {Theme} from '../utility/StaticData';
+import {Theme, storage} from '../utility/StaticData';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-
+const removeBox = [];
+function randomIntFromInterval(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+const addBox = new Map();
 const style = StyleSheet.create({
   lottieContainer: {
     position: 'absolute',
@@ -49,7 +55,9 @@ const style = StyleSheet.create({
   canvas: {flex: 1},
 });
 
-const Slider1 = () => {
+const Slider1 = ({navigation, store}) => {
+  const [storeState] = store;
+  console.log(storeState.isVibrate);
   const cx = useValue(100);
   const cy = useValue(windowHeight * 0.45);
   const copacity = useValue(1);
@@ -59,13 +67,15 @@ const Slider1 = () => {
   const gameOver = useRef(false);
   const add = useRef(0);
   const addPoints = useRef(0);
+
   const [state, setState] = useState({
     constraints: 1,
     points: 0,
+    reset: 0,
   });
   useEffect(() => {
-    DeviceEventEmitter.addListener('pointGain', () => {
-      pointGain();
+    DeviceEventEmitter.addListener('pointGain', key => {
+      pointGain(Number(key));
     });
     const sub = setInterval(() => {
       if (gameOver.current) {
@@ -73,36 +83,77 @@ const Slider1 = () => {
       }
       gameDifficultGen();
     }, 500);
-  }, []);
+  }, [state.reset]);
+
   const touchHandler = useTouchHandler({
     onActive: ({x, y}) => {
-      cx.current = x;
+      // if(windowWidth*0.1<cx.current &&windowWidth*0.9>cx.current ){
+      //   if((cx.current-x)<0)
+      //   cx.current = cx.current+10;
+      //   else
+      //   cx.current = cx.current-10;
+      // }
+      if (windowWidth * 0.1 < x && windowWidth * 0.9 > x) {
+        cx.current = x;
+      }
     },
   });
-
-  const hitGain = useCallback(() => {
-    copacity.current = 0;
-    gameOver.current = true;
+  const reset = () => {
+    copacity.current = 1;
+    gameOver.current = false;
+    setState(preState => ({
+      ...preState,
+      constraints: 1,
+      points: 0,
+      reset: preState.reset + 1,
+    }));
     hitBlockAnimation.current.setNativeProps({
-      opacity: 1,
-      top: cy.current - 100,
-      left: cx.current - 100,
-      zIndex: 1,
+      opacity: 0,
+      top: 0,
+      left: 0,
+      zIndex: 0,
     });
+  };
+  const hitGain = useCallback(
+    key => {
+      addBox.delete(key);
+      copacity.current = 0;
+      gameOver.current = true;
+      hitBlockAnimation.current.setNativeProps({
+        opacity: 1,
+        top: cy.current - 100,
+        left: cx.current - 100,
+        zIndex: 1,
+      });
 
-    animationRef.current.play(490, 600);
-  }, []);
-  const hitLost = useCallback(() => {
-    // gameDifficultGen();
+      animationRef.current.play(490, 600);
+      storage.set('highest_points', Number(30));
+      const temp = storage.getNumber('highest_points');
+      storage.set('highest_points', state.points);
+      if (storeState.isVibrate) {
+        Vibration.vibrate();
+      }
+      setTimeout(() => {
+        navigation.navigate('GameOver', {reset: reset});
+      }, 500);
+    },
+    [state],
+  );
+  const hitLost = useCallback(
+    key => {
+      addBox.delete(key);
+    },
+    [state],
+  );
 
-    console.log('hitLost');
-  }, [state]);
-
-  const pointGain = useCallback(() => {
-    // gameDifficultGen(true);
-    addPoints.current = 1;
-    console.log('pointGain');
-  }, [state]);
+  const pointGain = useCallback(
+    key => {
+      addBox.delete(key);
+      // gameDifficultGen(true);
+      addPoints.current = 1;
+    },
+    [state],
+  );
 
   const gameDifficultGen = useCallback(() => {
     switch (true) {
@@ -122,18 +173,56 @@ const Slider1 = () => {
       //   break;
     }
     delay.current = 0;
-    setState(preState => ({
-      ...preState,
-      constraints: preState.constraints + add.current,
-      points: preState.points + addPoints.current,
-    }));
+
+    setState(preState => {
+      for (let i = 0; i < add.current; i++) {
+        addBox.set(
+          preState.constraints + i,
+          <MemoBox index={preState.constraints + i} />,
+        );
+      }
+      if (addPoints.current) {
+        storage.set(
+          'highest_points',
+          Number(preState.points + addPoints.current),
+        );
+      }
+
+      return {
+        ...preState,
+        constraints: preState.constraints + add.current,
+        points: preState.points + addPoints.current,
+      };
+    });
+
     addPoints.current = 0;
     // setconstraints(constraints + add.current);
     // points && setpoints(points + 1);
-    console.log('gameDifficultGen');
   }, [state]);
 
   console.log('constraints', state);
+  console.log('addBox', addBox.size);
+
+  const MemoBox = ({index}) => (
+    <Box
+      key={index}
+      index={index}
+      x={Math.floor(Math.random() * windowWidth)}
+      y={-60}
+      pointerX={cx}
+      pointerY={cy}
+      HEIGHT={50}
+      WIDTH={50}
+      sr={randomIntFromInterval(1, 3)}
+      sf={randomIntFromInterval(1, 3)}
+      gameOver={gameOver}
+      delay={delay.current == 1 ? 0 : delay.current * 300}
+      isPoints={Math.floor(Math.random() * 3) === 2}
+      // pointGain={pointGain}
+      hitLost={hitLost}
+      hitGain={hitGain}
+    />
+  );
   return (
     <View style={{flex: 1, backgroundColor: Theme.screenColor}}>
       <View ref={hitBlockAnimation} style={style.lottieContainer}>
@@ -145,30 +234,14 @@ const Slider1 = () => {
       </View>
 
       <Canvas style={style.canvas} onTouch={touchHandler}>
-        {[...Array(state.constraints)].map((val, index) => {
-          if (index >= state.constraints - add.current) {
-            delay.current += 1;
-          }
-          return (
-            <Box
-              x={index % 2 ? windowWidth : 0}
-              y={-60}
-              pointerX={cx}
-              pointerY={cy}
-              HEIGHT={50}
-              WIDTH={50}
-              sr={3}
-              sf={2}
-              gameOver={gameOver}
-              delay={delay.current == 1 ? 0 : delay.current * 300}
-              isPoints={Math.floor(Math.random() * 3) === 2}
-              // pointGain={pointGain}
-              hitLost={hitLost}
-              hitGain={hitGain}
-            />
-          );
-        })}
-
+        <RoundedRect
+          r={30}
+          x={windowWidth * 0.1}
+          y={cy.current - 15}
+          width={windowWidth * 0.8}
+          height={30}
+          color={'rgba(28,32,46,255)'}
+        />
         <Circle
           opacity={copacity}
           cx={cx}
@@ -177,6 +250,13 @@ const Slider1 = () => {
           height={10}
           color={Theme.primaryColor}
         />
+        {[...Array(state.constraints)].map((val, index) => {
+          if (index >= state.constraints - add.current) {
+            delay.current += 1;
+          }
+          addBox.has(index);
+          return addBox.get(index);
+        })}
       </Canvas>
       <Text style={style.points}>{state.points}</Text>
     </View>
