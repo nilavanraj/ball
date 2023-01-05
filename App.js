@@ -8,6 +8,7 @@ import Slider1 from './src/screen/Slider1';
 import Slider2 from './src/screen/Slider2';
 
 import Rotate1 from './src/screen/Rotate1';
+import LottieSplashScreen from "react-native-lottie-splash-screen";
 
 import GameOver from './src/screen/GameOver';
 import {initialState, reducer} from './context';
@@ -22,6 +23,9 @@ const MyTheme = {
 };
 const Stack = createNativeStackNavigator();
 function App() {
+  React.useEffect(() => {
+    LottieSplashScreen.hide(); // here
+  }, []);
   // [state, dispatch]
   const store = React.useReducer(reducer, initialState);
 
