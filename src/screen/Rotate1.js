@@ -22,7 +22,6 @@ import {
   Circle,
   useValue,
   useTouchHandler,
-  RoundedRect,
 } from '@shopify/react-native-skia';
 import Box from '../components/Box1';
 import Lottie from 'lottie-react-native';
@@ -95,6 +94,8 @@ const Slider1 = ({navigation, store}) => {
     };
   }, [state.reset]);
   useEffect(() => {
+    storage.set('points', JSON.stringify(state.points));
+
     if (state.points) {
       const temp = storage.getString('highest_points');
       if (Number(temp) < state.points) {
@@ -104,10 +105,6 @@ const Slider1 = ({navigation, store}) => {
   }, [state.points]);
 
   const touchHandler = useTouchHandler({
-    onStart: ({x, y}) => {
-      addonPosition = x;
-      console.log('start', x, y);
-    },
     onActive: ({x, y}) => {
       var angle = 360 * (x / windowWidth);
 
@@ -166,6 +163,9 @@ const Slider1 = ({navigation, store}) => {
   const pointGain = useCallback(
     key => {
       addBox.delete(key);
+      if (storeState.isVibrate) {
+        Vibration.vibrate(100);
+      }
       // gameDifficultGen(true);
       addPoints.current = 1;
     },

@@ -75,6 +75,8 @@ const Slider1 = ({navigation, store}) => {
     reset: 0,
   });
   useEffect(() => {
+    storage.set('points', JSON.stringify(state.points));
+
     if (state.points) {
       const temp = storage.getString('highest_points');
       if (Number(temp) < state.points) {
@@ -159,6 +161,9 @@ const Slider1 = ({navigation, store}) => {
   const pointGain = useCallback(
     key => {
       addBox.delete(key);
+      if (storeState.isVibrate) {
+        Vibration.vibrate(100);
+      }
       // gameDifficultGen(true);
       addPoints.current = 1;
     },
