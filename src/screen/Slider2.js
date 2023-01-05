@@ -30,7 +30,7 @@ import {Theme, storage} from '../utility/StaticData';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-
+const removeBox = [];
 function randomIntFromInterval(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -58,6 +58,7 @@ const style = StyleSheet.create({
 const Slider1 = ({navigation, store}) => {
   const [storeState] = store;
   const cx = useValue(windowWidth * 0.1);
+  const cx1 = useValue(windowWidth * 0.9);
 
   const cy = useValue(windowHeight * 0.45);
   const copacity = useValue(1);
@@ -67,7 +68,6 @@ const Slider1 = ({navigation, store}) => {
   const gameOver = useRef(false);
   const add = useRef(0);
   const addPoints = useRef(0);
-  const points = useRef(0);
 
   const [state, setState] = useState({
     constraints: 1,
@@ -76,7 +76,6 @@ const Slider1 = ({navigation, store}) => {
   });
   useEffect(() => {
     if (state.points) {
-      storage.set('points', JSON.stringify(state.points));
       const temp = storage.getString('highest_points');
       if (Number(temp) < state.points) {
         storage.set('highest_points', JSON.stringify(state.points));
@@ -106,6 +105,7 @@ const Slider1 = ({navigation, store}) => {
     onActive: ({x, y}) => {
       if (windowWidth * 0.1 <= x && windowWidth * 0.9 >= x) {
         cx.current = x;
+        cx1.current = windowWidth - x;
       }
     },
   });
@@ -144,11 +144,10 @@ const Slider1 = ({navigation, store}) => {
         Vibration.vibrate();
       }
       setTimeout(() => {
-        console.log(state.points);
         navigation.navigate('GameOver', {reset: reset, points: state.points});
       }, 500);
     },
-    [state.points],
+    [state],
   );
   const hitLost = useCallback(
     key => {
@@ -201,6 +200,8 @@ const Slider1 = ({navigation, store}) => {
     });
 
     addPoints.current = 0;
+    // setconstraints(constraints + add.current);
+    // points && setpoints(points + 1);
   }, [state]);
 
   const MemoBox = ({index}) => (
@@ -209,7 +210,7 @@ const Slider1 = ({navigation, store}) => {
       index={index}
       x={Math.floor(Math.random() * windowWidth)}
       y={-60}
-      pointer={[cx, cy]}
+      pointer={[cx, cy, cx1, cy]}
       HEIGHT={50}
       WIDTH={50}
       sr={randomIntFromInterval(1, 3)}
@@ -249,7 +250,14 @@ const Slider1 = ({navigation, store}) => {
           height={10}
           color={Theme.primaryColor}
         />
-
+        <Circle
+          opacity={copacity}
+          cx={cx1}
+          cy={cy}
+          r={20}
+          height={10}
+          color={Theme.primaryColor}
+        />
         {[...Array(state.constraints)].map((val, index) => {
           if (index >= state.constraints - add.current) {
             delay.current += 1;

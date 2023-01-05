@@ -24,13 +24,12 @@ import {
   useTouchHandler,
   RoundedRect,
 } from '@shopify/react-native-skia';
-import Box from '../components/Box';
+import Box from '../components/Box1';
 import Lottie from 'lottie-react-native';
 import {Theme, storage} from '../utility/StaticData';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-
 function randomIntFromInterval(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -54,12 +53,17 @@ const style = StyleSheet.create({
   },
   canvas: {flex: 1},
 });
-
 const Slider1 = ({navigation, store}) => {
   const [storeState] = store;
-  const cx = useValue(windowWidth * 0.1);
 
-  const cy = useValue(windowHeight * 0.45);
+  const cx1 = useValue(windowWidth);
+  var radius = (windowHeight * 0.45) / 2;
+  const cx = useValue(
+    windowWidth * 0.5 + radius * Math.sin((Math.PI * 2 * 0) / 360),
+  );
+  const cy = useValue(
+    windowHeight * 0.45 + radius * Math.cos((Math.PI * 2 * 0) / 360),
+  );
   const copacity = useValue(1);
   const animationRef = useRef(null);
   const hitBlockAnimation = useRef(null);
@@ -67,23 +71,12 @@ const Slider1 = ({navigation, store}) => {
   const gameOver = useRef(false);
   const add = useRef(0);
   const addPoints = useRef(0);
-  const points = useRef(0);
 
   const [state, setState] = useState({
     constraints: 1,
     points: 0,
     reset: 0,
   });
-  useEffect(() => {
-    if (state.points) {
-      storage.set('points', JSON.stringify(state.points));
-      const temp = storage.getString('highest_points');
-      if (Number(temp) < state.points) {
-        storage.set('highest_points', JSON.stringify(state.points));
-      }
-    }
-  }, [state.points]);
-
   useEffect(() => {
     const listener = DeviceEventEmitter.addListener('pointGain', key => {
       pointGain(Number(key));
@@ -101,12 +94,27 @@ const Slider1 = ({navigation, store}) => {
       listener.remove();
     };
   }, [state.reset]);
+  useEffect(() => {
+    if (state.points) {
+      const temp = storage.getString('highest_points');
+      if (Number(temp) < state.points) {
+        storage.set('highest_points', JSON.stringify(state.points));
+      }
+    }
+  }, [state.points]);
 
   const touchHandler = useTouchHandler({
+    onStart: ({x, y}) => {
+      addonPosition = x;
+      console.log('start', x, y);
+    },
     onActive: ({x, y}) => {
-      if (windowWidth * 0.1 <= x && windowWidth * 0.9 >= x) {
-        cx.current = x;
-      }
+      var angle = 360 * (x / windowWidth);
+
+      cx.current =
+        windowWidth * 0.5 + radius * Math.sin((Math.PI * 2 * angle) / 360);
+      cy.current =
+        windowHeight * 0.45 + radius * Math.cos((Math.PI * 2 * angle) / 360);
     },
   });
   const reset = () => {
@@ -127,8 +135,7 @@ const Slider1 = ({navigation, store}) => {
   };
   const hitGain = useCallback(
     (key, tempCX, tempCY) => {
-      console.log(tempCX.current, tempCY.current);
-
+      //  console.log(tempCX.current, tempCY.current);
       addBox.delete(key);
       copacity.current = 0;
       gameOver.current = true;
@@ -144,11 +151,10 @@ const Slider1 = ({navigation, store}) => {
         Vibration.vibrate();
       }
       setTimeout(() => {
-        console.log(state.points);
         navigation.navigate('GameOver', {reset: reset, points: state.points});
       }, 500);
     },
-    [state.points],
+    [state],
   );
   const hitLost = useCallback(
     key => {
@@ -201,19 +207,25 @@ const Slider1 = ({navigation, store}) => {
     });
 
     addPoints.current = 0;
+    // setconstraints(constraints + add.current);
+    // points && setpoints(points + 1);
   }, [state]);
+
+  // console.log('constraints', state);
+  // console.log('addBox', addBox.size);
 
   const MemoBox = ({index}) => (
     <Box
       key={index}
       index={index}
-      x={Math.floor(Math.random() * windowWidth)}
-      y={-60}
-      pointer={[cx, cy]}
+      x={windowWidth / 2}
+      y={windowHeight * 0.45}
+      pointer={[cx, cy, cx1, cy]}
       HEIGHT={50}
       WIDTH={50}
       sr={randomIntFromInterval(1, 3)}
       sf={randomIntFromInterval(1, 3)}
+      sfx={Math.floor(Math.random() * 6)}
       gameOver={gameOver}
       delay={delay.current == 1 ? 0 : delay.current * 300}
       isPoints={Math.floor(Math.random() * 3) === 2}
@@ -233,13 +245,21 @@ const Slider1 = ({navigation, store}) => {
       </View>
 
       <Canvas style={style.canvas} onTouch={touchHandler}>
-        <RoundedRect
-          r={30}
-          x={windowWidth * 0.1}
-          y={cy.current - 15}
-          width={windowWidth * 0.8}
-          height={30}
+        <Circle
+          opacity={copacity}
+          cx={windowWidth * 0.5}
+          cy={windowHeight * 0.45}
+          r={radius + 10}
+          height={10}
           color={'rgba(28,32,46,255)'}
+        />
+        <Circle
+          opacity={copacity}
+          cx={windowWidth * 0.5}
+          cy={windowHeight * 0.45}
+          r={radius - 10}
+          height={10}
+          color={Theme.screenColor}
         />
         <Circle
           opacity={copacity}
@@ -249,7 +269,6 @@ const Slider1 = ({navigation, store}) => {
           height={10}
           color={Theme.primaryColor}
         />
-
         {[...Array(state.constraints)].map((val, index) => {
           if (index >= state.constraints - add.current) {
             delay.current += 1;

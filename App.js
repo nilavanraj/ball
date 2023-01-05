@@ -5,6 +5,10 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {Theme} from './src/utility/StaticData';
 import Home from './src/screen/Home';
 import Slider1 from './src/screen/Slider1';
+import Slider2 from './src/screen/Slider2';
+
+import Rotate1 from './src/screen/Rotate1';
+
 import GameOver from './src/screen/GameOver';
 import {initialState, reducer} from './context';
 
@@ -37,6 +41,12 @@ function App() {
         </Stack.Screen>
         <Stack.Screen name="Slider1">
           {props => <Slider1 {...props} store={store} />}
+        </Stack.Screen>
+        <Stack.Screen name="Slider2">
+          {props => <Slider2 {...props} store={store} />}
+        </Stack.Screen>
+        <Stack.Screen name="Rotate1">
+          {props => <Rotate1 {...props} store={store} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

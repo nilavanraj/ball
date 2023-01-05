@@ -20,8 +20,17 @@ const speedRotation = {
   2: 0.05,
   3: 0.07,
 };
+
+const speedFallX = {
+  0: 2,
+  1: -5,
+  2: 5,
+  3: 3,
+  4: -3,
+  5: -2,
+};
 const speedFall = {
-  1: 5,
+  1: -5,
   2: 3,
   3: 2,
 };
@@ -40,9 +49,9 @@ const Box = ({
   y = 0,
   gameOver,
   index,
+  sfx,
   isfall = true,
 }) => {
-  const incrementX = (windowWidth / 2 - x) / (windowHeight / 2);
   const rx = useValue(x);
   const ry = useValue(y);
   const position = useValue(0.785);
@@ -56,7 +65,7 @@ const Box = ({
       clock.stop();
     }
 
-    if (ry.current > 400 || ballTouch.current) {
+    if (ry.current > windowHeight || ballTouch.current) {
       if (dynamicWidth.current < 10) {
         dynamicWidth.current = 0;
         dynamicHeight.current = 0;
@@ -73,9 +82,10 @@ const Box = ({
     }
     position.current = position.current + speedRotation[sr];
     ry.current += speedFall[sf];
-    if (isfall) {
-      rx.current = x + incrementX * ry.current;
-    }
+    rx.current += speedFallX[sfx];
+    // if (isfall) {
+    //   rx.current = x + incrementX * ry.current;
+    // }
     return 1;
   });
 
@@ -93,28 +103,22 @@ const Box = ({
   }, []);
 
   useValueEffect(position, () => {
+    // const angle = (position.current * 180) / Math.PI;
     const section1 = hasIntersection(
       {x: pointer[0].current, y: pointer[1].current, r: 21},
       {x: rx.current, y: ry.current, width: WIDTH, height: HEIGHT},
     );
-    let section2 = null;
-    if(pointer[2] && pointer[3])
-    section2 = hasIntersection(
-      {x: pointer[2].current, y: pointer[3].current, r: 21},
-      {x: rx.current, y: ry.current, width: WIDTH, height: HEIGHT},
-    );
-    // const angle = (position.current * 180) / Math.PI;
-    if ((section1 || section2) && !hit.check) {
+    if (pointer[0]?.current && pointer[1]?.current && section1 && !hit.check) {
       hit.check = true;
       if (isPoints) {
+        // pointGain();
+        // clock.stop();
         DeviceEventEmitter.emit('pointGain', index);
         ballTouch.current = true;
       } else {
         clock.stop();
         if (section1) {
           hitGain(index, pointer[0], pointer[1]);
-        } else if (section2) {
-          hitGain(index, pointer[2], pointer[3]);
         }
       }
     }

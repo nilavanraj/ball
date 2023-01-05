@@ -4,6 +4,7 @@ import {View, Text, StyleSheet, TouchableOpacity, Animated} from 'react-native';
 import {SvgXml} from 'react-native-svg';
 import {reload, link, volume, mute, dot3} from '../utility/images/CommonIcon';
 import {Theme, storage} from '../utility/StaticData';
+import {CommonActions} from '@react-navigation/native';
 
 const style = StyleSheet.create({
   container: {flex: 1, alignItems: 'center', justifyContent: 'flex-end'},
@@ -48,8 +49,12 @@ function HomeScreen({navigation, route, store}) {
 
   const animatedStartValue = React.useRef(new Animated.Value(0.5)).current;
   const [points, setpoints] = React.useState(0);
+  const [totalpoints, setTotalpoints] = React.useState(0);
+
   React.useEffect(() => {
-    const temp = storage.getNumber('highest_points');
+    const temp = storage.getString('highest_points') || 0;
+    const temp2 = storage.getString('points') || 0;
+    setTotalpoints(Number(temp2));
     setpoints(temp);
     Animated.loop(
       Animated.sequence([
@@ -71,21 +76,36 @@ function HomeScreen({navigation, route, store}) {
   }, []);
   return (
     <View style={style.container}>
-      <Text style={style.points}>{points || 0}</Text>
+      {totalpoints == points ? (
+        <Text style={style.points}>{points || 0}</Text>
+      ) : (
+        <Text style={style.points}>{totalpoints}</Text>
+      )}
       <Animated.View
         style={{
           // Bind opacity to animated value
           opacity: animatedStartValue,
         }}>
-        <Text style={style.headers}>new Best!</Text>
+        {totalpoints == points ? (
+          <Text style={style.headers}>New Best 😊</Text>
+        ) : (
+          <Text style={style.headers}> Points </Text>
+        )}
       </Animated.View>
 
       <View style={style.allIcons}>
         <View style={style.icons}>
           <TouchableOpacity
             onPress={() => {
-              navigation.goBack();
-              route.params.reset({selected: true});
+              // navigation.goBack();
+              // route.params.reset({selected: true});
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [{name: 'Home'}],
+                }),
+              );
+              // navigation.dispatch(resetAction);
             }}
             style={style.iconl}>
             <SvgXml fill="white" width={50} height={50} xml={link} />
@@ -100,8 +120,11 @@ function HomeScreen({navigation, route, store}) {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              if (storeState.isVibrate) dispatch({type: 'vibrate_off'});
-              else dispatch({type: 'vibrate_on'});
+              if (storeState.isVibrate) {
+                dispatch({type: 'vibrate_off'});
+              } else {
+                dispatch({type: 'vibrate_on'});
+              }
             }}
             style={style.iconr}>
             {storeState.isVibrate ? (

@@ -93,20 +93,28 @@ const Box = ({
   }, []);
 
   useValueEffect(position, () => {
+    // const angle = (position.current * 180) / Math.PI;
     const section1 = hasIntersection(
       {x: pointer[0].current, y: pointer[1].current, r: 21},
       {x: rx.current, y: ry.current, width: WIDTH, height: HEIGHT},
     );
-    let section2 = null;
-    if(pointer[2] && pointer[3])
-    section2 = hasIntersection(
-      {x: pointer[2].current, y: pointer[3].current, r: 21},
-      {x: rx.current, y: ry.current, width: WIDTH, height: HEIGHT},
-    );
-    // const angle = (position.current * 180) / Math.PI;
-    if ((section1 || section2) && !hit.check) {
+    const section2 =
+      pointer[2] &&
+      pointer[3] &&
+      hasIntersection(
+        {x: pointer[2].current, y: pointer[3].current, r: 21},
+        {x: rx.current, y: ry.current, width: WIDTH, height: HEIGHT},
+      );
+    if (
+      pointer[0]?.current &&
+      pointer[1]?.current &&
+      (section1 || section2) &&
+      !hit.check
+    ) {
       hit.check = true;
       if (isPoints) {
+        // pointGain();
+        // clock.stop();
         DeviceEventEmitter.emit('pointGain', index);
         ballTouch.current = true;
       } else {
