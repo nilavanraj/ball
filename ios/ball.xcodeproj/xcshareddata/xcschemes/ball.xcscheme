@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "ball.app"
-               BlueprintName = "ball"
-               ReferencedContainer = "container:ball.xcodeproj">
+               BuildableName = "Ball.app"
+               BlueprintName = "Ball"
+               ReferencedContainer = "container:Ball.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "ballTests.xctest"
-               BlueprintName = "ballTests"
-               ReferencedContainer = "container:ball.xcodeproj">
+               BuildableName = "BallTests.xctest"
+               BlueprintName = "BallTests"
+               ReferencedContainer = "container:Ball.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "ball.app"
-            BlueprintName = "ball"
-            ReferencedContainer = "container:ball.xcodeproj">
+            BuildableName = "Ball.app"
+            BlueprintName = "Ball"
+            ReferencedContainer = "container:Ball.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "ball.app"
-            BlueprintName = "ball"
-            ReferencedContainer = "container:ball.xcodeproj">
+            BuildableName = "Ball.app"
+            BlueprintName = "Ball"
+            ReferencedContainer = "container:Ball.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

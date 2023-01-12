@@ -22,7 +22,7 @@ const DATA = [
     name: 'III',
   },
 ];
-const navObj = ["Slider1", "Slider2","Rotate1"]
+const navObj = ['Slider1', 'Slider2', 'Rotate1'];
 const style = StyleSheet.create({
   container: {flex: 1, alignItems: 'center', justifyContent: 'center'},
   headers: {
@@ -90,6 +90,9 @@ function HomeScreen({navigation}) {
         renderItem={renderItem}
       />
       <TouchableOpacity
+        style={{
+          paddingBottom: 30,
+        }}
         onPress={() => {
           navigation.navigate(navObj[selectedId]);
         }}>

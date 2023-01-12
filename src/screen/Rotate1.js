@@ -48,7 +48,8 @@ const style = StyleSheet.create({
     color: 'white',
     fontSize: 150,
     alignSelf: 'center',
-    top: '70%',
+    bottom: 0,
+    paddingBottom: 10,
   },
   canvas: {flex: 1},
 });
@@ -67,6 +68,8 @@ const Slider1 = ({navigation, store}) => {
   const animationRef = useRef(null);
   const hitBlockAnimation = useRef(null);
   const delay = useRef(0);
+  const onStart = useRef(0);
+  const angle = useRef(0);
   const gameOver = useRef(false);
   const add = useRef(0);
   const addPoints = useRef(0);
@@ -98,20 +101,34 @@ const Slider1 = ({navigation, store}) => {
 
     if (state.points) {
       const temp = storage.getString('highest_points');
-      if (Number(temp) < state.points) {
+      if (!temp || Number(temp) < state.points) {
         storage.set('highest_points', JSON.stringify(state.points));
       }
     }
   }, [state.points]);
 
   const touchHandler = useTouchHandler({
+    onStart: ({x, y}) => {
+      onStart.current = x;
+
+    },
     onActive: ({x, y}) => {
-      var angle = 360 * (x / windowWidth);
+      if(x > onStart.current)
+      angle.current =
+        angle.current +
+        360 * ((Math.abs(x - onStart.current) * 0.3) / windowWidth);
+        else
+        angle.current =
+        angle.current -
+        360 * ((Math.abs(x - onStart.current) * 0.3) / windowWidth);
+      // var angle = 360 * (x / windowWidth);
 
       cx.current =
-        windowWidth * 0.5 + radius * Math.sin((Math.PI * 2 * angle) / 360);
+        windowWidth * 0.5 +
+        radius * Math.sin((Math.PI * 2 * angle.current) / 360);
       cy.current =
-        windowHeight * 0.45 + radius * Math.cos((Math.PI * 2 * angle) / 360);
+        windowHeight * 0.45 +
+        radius * Math.cos((Math.PI * 2 * angle.current) / 360);
     },
   });
   const reset = () => {

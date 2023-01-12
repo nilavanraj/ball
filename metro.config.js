@@ -14,4 +14,10 @@ module.exports = {
       },
     }),
   },
+  node: {
+    global: true,
+  },
+  resolver: {
+    sourceExts: ['jsx', 'js', 'ts', 'tsx', 'cjs', 'json'],
+  },
 };
