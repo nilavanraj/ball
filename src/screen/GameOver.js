@@ -19,10 +19,11 @@ const style = StyleSheet.create({
     fontSize: 150,
   },
   allIcons: {
-    marginTop: '20%',
+    bottom: 0,
     marginBottom: '10%',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 50,
   },
   icons: {
     flexDirection: 'row',
@@ -30,17 +31,18 @@ const style = StyleSheet.create({
   },
   iconl: {
     paddingRight: '15%',
-    marginTop: '5%',
+    marginTop: 60,
   },
   iconc: {
+    marginTop: 50,
     transform: [{rotate: '55deg'}],
   },
   iconr: {
     paddingLeft: '15%',
-    marginTop: '5%',
+    marginTop: 60,
   },
   iconb: {
-    marginTop: '10%',
+    marginTop: 50,
   },
 });
 
@@ -76,7 +78,7 @@ function HomeScreen({navigation, route, store}) {
   }, []);
   return (
     <View style={style.container}>
-      {totalpoints == points ? (
+      {points!= 0 &&  totalpoints == points ? (
         <Text style={style.points}>{points || 0}</Text>
       ) : (
         <Text style={style.points}>{totalpoints}</Text>
@@ -86,7 +88,7 @@ function HomeScreen({navigation, route, store}) {
           // Bind opacity to animated value
           opacity: animatedStartValue,
         }}>
-        {totalpoints == points ? (
+        {points!= 0 && totalpoints == points ? (
           <Text style={style.headers}>New Best 😊</Text>
         ) : (
           <Text style={style.headers}> Points </Text>

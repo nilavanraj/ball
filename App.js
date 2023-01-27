@@ -24,7 +24,7 @@ const MyTheme = {
 const Stack = createNativeStackNavigator();
 function App() {
   React.useEffect(() => {
-    LottieSplashScreen.hide(); // here
+    LottieSplashScreen?.hide(); // here
   }, []);
   // [state, dispatch]
   const store = React.useReducer(reducer, initialState);

@@ -79,7 +79,7 @@ const Slider1 = ({navigation, store}) => {
 
     if (state.points) {
       const temp = storage.getString('highest_points');
-      if (Number(temp) < state.points) {
+      if (!temp || Number(temp) < state.points) {
         storage.set('highest_points', JSON.stringify(state.points));
       }
     }
