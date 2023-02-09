@@ -10,5 +10,8 @@ React Native 2D Game
 
 </p>
 
+Google Play
+https://play.google.com/store/apps/details?id=com.box.ball
+
 Download here
 https://drive.google.com/file/d/15F4xEkUtMGsapxMBdZ9dz2EqT9QptUWs/view?usp=sharing
